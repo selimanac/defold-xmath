@@ -3,6 +3,7 @@
 #define DLIB_LOG_DOMAIN "xMath"
 
 #include <dmsdk/sdk.h>
+#include <dmsdk/dlib/vmath.h>
 
 //* Arithmetic
 //* ----------------------------------------------------------------------------
@@ -192,7 +193,7 @@ static int xMath_quat_axis_angle(lua_State* L)
         Vectormath::Aos::Quat *out = dmScript::CheckQuat(L, 1);
         Vectormath::Aos::Vector3 *axis = dmScript::CheckVector3(L, 2);
         float angle = (float) luaL_checknumber(L, 3);
-        *out = Vectormath::Aos::Quat(*axis, angle);
+        *out = Vectormath::Aos::Quat::rotation(angle, *axis);
     }
 
     return 0;
@@ -276,6 +277,29 @@ static int xMath_quat(lua_State* L)
     return 0;
 }
 
+static int xMath_euler_to_quat(lua_State* L)
+{
+    if (dmScript::IsQuat(L, 1))
+    {
+        Vectormath::Aos::Quat *out = dmScript::CheckQuat(L, 1);
+        Vectormath::Aos::Vector3 euler;
+        if (dmScript::IsVector3(L, 2))
+        {
+            euler = *dmScript::CheckVector3(L, 2);
+        }
+        else
+        {
+            float x = (float) luaL_checknumber(L, 2);
+            float y = (float) luaL_checknumber(L, 3);
+            float z = (float) luaL_checknumber(L, 4);
+            euler = Vectormath::Aos::Vector3(x, y, z);
+        }
+        *out = dmVMath::EulerToQuat(euler);
+    }
+
+    return 0;
+}
+
 //* Vector + Quat
 //* ----------------------------------------------------------------------------
 
@@ -283,11 +307,11 @@ static int xMath_lerp(lua_State* L)
 {
     if (lua_isnumber(L, 1))
     {
-        float out = luaL_checknumber(L, 1);
-        float t = (float) luaL_checknumber(L, 2);
-        float lhs = (float) luaL_checknumber(L, 3);
-        float rhs = (float) luaL_checknumber(L, 4);
-        out = (lhs + ((rhs - lhs) * t));
+        float t = (float) luaL_checknumber(L, 1);
+        float lhs = (float) luaL_checknumber(L, 2);
+        float rhs = (float) luaL_checknumber(L, 3);
+        lua_pushnumber(L, lhs + ((rhs - lhs) * t));
+        return 1;
     }
     else if (dmScript::IsVector3(L, 1))
     {
@@ -311,9 +335,9 @@ static int xMath_lerp(lua_State* L)
         float t = (float) luaL_checknumber(L, 2);
         Vectormath::Aos::Quat *lhs = dmScript::CheckQuat(L, 3);
         Vectormath::Aos::Quat *rhs = dmScript::CheckQuat(L, 4);
-        *out = Vectormath::Aos::slerp(t, *lhs, *rhs);
+        *out = Vectormath::Aos::lerp(t, *lhs, *rhs);
     }
-    
+
     return 0;
 }
 
@@ -352,18 +376,18 @@ static int xMath_slerp(lua_State* L)
 
 static int xMath_matrix(lua_State* L)
 {
-    if (lua_gettop(L) == 0 && dmScript::IsMatrix4(L, 1))
+    if (lua_gettop(L) == 1 && dmScript::IsMatrix4(L, 1))
     {
         Vectormath::Aos::Matrix4 *out = dmScript::CheckMatrix4(L, 1);
         *out = Vectormath::Aos::Matrix4::identity();
     }
-    else if (lua_gettop(L) == 1 && dmScript::IsMatrix4(L, 1) && dmScript::IsMatrix4(L, 2))
+    else if (lua_gettop(L) == 2 && dmScript::IsMatrix4(L, 1) && dmScript::IsMatrix4(L, 2))
     {
         Vectormath::Aos::Matrix4 *out = dmScript::CheckMatrix4(L, 1);
-        Vectormath::Aos::Matrix4 *in = dmScript::CheckMatrix4(L, 1);
+        Vectormath::Aos::Matrix4 *in = dmScript::CheckMatrix4(L, 2);
         *out = *in;
     }
-    
+
     return 0;
 }
 
@@ -738,6 +762,7 @@ static const luaL_reg xMathModule_methods[] =
     {"quat_rotation_z", xMath_quat_rotation_z},
     {"quat", xMath_quat},
     {"quat_matrix4", xMath_quat_matrix4},
+    {"euler_to_quat", xMath_euler_to_quat},
     //* Vector + Quat
     {"lerp", xMath_lerp},
     {"slerp", xMath_slerp},
