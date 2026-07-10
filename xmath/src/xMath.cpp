@@ -485,11 +485,9 @@ static int xMath_matrix_look_at(lua_State* L)
     if (dmScript::IsMatrix4(L, 1))
     {
         Vectormath::Aos::Matrix4* out = dmScript::CheckMatrix4(L, 1);
-        Vectormath::Aos::Point3   eye =
-        Vectormath::Aos::Point3(*dmScript::CheckVector3(L, 2));
-        Vectormath::Aos::Point3 target =
-        Vectormath::Aos::Point3(*dmScript::CheckVector3(L, 3));
-        Vectormath::Aos::Vector3 up = *dmScript::CheckVector3(L, 4);
+        Vectormath::Aos::Point3   eye = Vectormath::Aos::Point3(*dmScript::CheckVector3(L, 2));
+        Vectormath::Aos::Point3   target = Vectormath::Aos::Point3(*dmScript::CheckVector3(L, 3));
+        Vectormath::Aos::Vector3  up = *dmScript::CheckVector3(L, 4);
         *out = Vectormath::Aos::Matrix4::lookAt(eye, target, up);
     }
 
@@ -625,6 +623,7 @@ static int xMath_matrix4_compose(lua_State* L)
     {
         Vectormath::Aos::Matrix4* out = dmScript::CheckMatrix4(L, 1);
         Vectormath::Aos::Vector3  translation(0, 0, 0);
+
         if (dmScript::IsVector3(L, 2))
         {
             translation = *dmScript::CheckVector3(L, 2);
@@ -633,14 +632,12 @@ static int xMath_matrix4_compose(lua_State* L)
         {
             translation = dmScript::CheckVector4(L, 2)->getXYZ();
         }
+
         Vectormath::Aos::Quat*    rotation = dmScript::CheckQuat(L, 3);
         Vectormath::Aos::Vector3* scale = dmScript::CheckVector3(L, 4);
-
-        Vectormath::Aos::Matrix3  rotationMatrix =
-        Vectormath::Aos::Matrix3(*rotation);
-        Vectormath::Aos::Matrix3 scaleMatrix =
-        Vectormath::Aos::Matrix3::scale(*scale);
-        Vectormath::Aos::Matrix3 rs = rotationMatrix * scaleMatrix;
+        Vectormath::Aos::Matrix3  rotationMatrix = Vectormath::Aos::Matrix3(*rotation);
+        Vectormath::Aos::Matrix3  scaleMatrix = Vectormath::Aos::Matrix3::scale(*scale);
+        Vectormath::Aos::Matrix3  rs = rotationMatrix * scaleMatrix;
 
         *out = Vectormath::Aos::Matrix4(rs, translation);
     }
