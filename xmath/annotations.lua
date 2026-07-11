@@ -1,5 +1,5 @@
 ---xMath Extension
----Allocation-free re-implementation of Defold's vmath module — every function writes into its first (output) argument in place instead of returning a newly allocated value.
+---Allocation-free re-implementation of Defold's vmath module — most functions write into their first (output) argument in place; some overloads (e.g. lerp/clamp for numbers) return a number.
 ---@class xmath
 xmath = {}
 
